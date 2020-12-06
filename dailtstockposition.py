@@ -172,7 +172,7 @@ def two_week_report(tickerlist):
         signals_two['upper_BB'] = DATA['Close'].rolling(window=10, min_periods=1, center=False).mean() + 2 * DATA['Close'].rolling(window=10, min_periods=1, center=False).std()
         signals_two['lower_BB'] = DATA['Close'].rolling(window=10, min_periods=1, center=False).mean() - 2 * DATA['Close'].rolling(window=10, min_periods=1, center=False).std()
         ax = signals_two[['upper_BB', 'lower_BB']].plot(ax=ax1, lw=1, alpha=0.4, color="black")
-        ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha='0.4')
+        ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha=0.4)
    
         # Plot the short and long moving averages
         signals[['short_mavg', 'long_mavg']].plot(ax=ax1, lw=2.)
@@ -189,7 +189,7 @@ def two_week_report(tickerlist):
         plt.title(ticker + " 2 Week Moving Average Crossover")
         plt.show()
         filename = ticker + "_2week_report.png"
-        fig.savefig(r"C:\Users\jcabr\OneDrive\Documents\StockAnalysis\Results\%s" %(filename))
+        fig.savefig(r"Results/%s" %(filename))
 
 def monthly_report(tickerlist):
     for ticker in tickerlist:
@@ -232,7 +232,7 @@ def monthly_report(tickerlist):
         signals_two['upper_BB'] = DATA['Close'].rolling(window=10, min_periods=1, center=False).mean() + 2 * DATA['Close'].rolling(window=10, min_periods=1, center=False).std()
         signals_two['lower_BB'] = DATA['Close'].rolling(window=10, min_periods=1, center=False).mean() - 2 * DATA['Close'].rolling(window=10, min_periods=1, center=False).std()
         ax = signals_two[['upper_BB', 'lower_BB']].plot(ax=ax1, lw=1, alpha=0.4, color="black")
-        ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha='0.4')
+        ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha=0.4)
    
         # Plot the short and long moving averages
         signals[['short_mavg', 'long_mavg']].plot(ax=ax1, lw=2.)
@@ -249,7 +249,7 @@ def monthly_report(tickerlist):
         plt.title(ticker + " 1 Month Moving Average Crossover")
         plt.show()
         filename = ticker + "_1month_report.png"
-        fig.savefig(r"C:\Users\jcabr\OneDrive\Documents\StockAnalysis\Results\%s" %(filename))
+        fig.savefig(r"Results/%s" %(filename))
 
 
 def quarterly_report(tickerlist):
@@ -298,7 +298,7 @@ def quarterly_report(tickerlist):
         signals_two['upper_BB'] = DATA['Close'].rolling(window=10, min_periods=1, center=False).mean() + 2 * DATA['Close'].rolling(window=10, min_periods=1, center=False).std()
         signals_two['lower_BB'] = DATA['Close'].rolling(window=10, min_periods=1, center=False).mean() - 2 * DATA['Close'].rolling(window=10, min_periods=1, center=False).std()
         ax = signals_two[['upper_BB', 'lower_BB']].plot(ax=ax1, lw=1, alpha=0.4, color="black")
-        ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha='0.4')
+        ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha=0.4)
    
         # Plot the short and long moving averages
         signals[['short_mavg', 'long_mavg']].plot(ax=ax1, lw=2.)
@@ -315,7 +315,7 @@ def quarterly_report(tickerlist):
         plt.title(ticker + " 3 Month Moving Average Crossover")
         plt.show()
         filename = ticker + "_3month_report.png"
-        fig.savefig(r"C:\Users\jcabr\OneDrive\Documents\StockAnalysis\Results\%s" %(filename))
+        fig.savefig(r"Results/%s" %(filename))
 
 def yearly_report(tickerlist):
     for ticker in tickerlist:
@@ -353,7 +353,7 @@ def yearly_report(tickerlist):
         signals_two['upper_BB'] = DATA['Close'].rolling(window=30, min_periods=1, center=False).mean() + 2 * DATA['Close'].rolling(window=30, min_periods=1, center=False).std()
         signals_two['lower_BB'] = DATA['Close'].rolling(window=30, min_periods=1, center=False).mean() - 2 * DATA['Close'].rolling(window=30, min_periods=1, center=False).std()
         ax = signals_two[['upper_BB', 'lower_BB']].plot(ax=ax1, lw=1, alpha=0.4, color="black")
-        ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha='0.4')
+        ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha=0.4)
         
         # Plot the short and long moving averages
         signals[['short_mavg', 'long_mavg']].plot(ax=ax1, lw=2.)
@@ -369,10 +369,9 @@ def yearly_report(tickerlist):
         plt.title(ticker + " 1 Year Moving Average Crossover")
         plt.show()
         filename = ticker + "_1year_report.png"
-#        fig.savefig(r"C:\Users\jcabr\OneDrive\Documents\StockAnalysis\Results\%s" %(filename))
         cwd = os.getcwd()
         print(os.listdir(cwd))
-        fig.savefig(r"C:\Users\jcabr\OneDrive\Documents\StockAnalysis\Results\LULU_1year_report.png")
+        fig.savefig(r"Results/%s" %(filename))
         
 
 def three_year_report(tickerlist):
@@ -412,7 +411,7 @@ def three_year_report(tickerlist):
         signals_two['upper_BB'] = DATA['Close'].rolling(window=80, min_periods=1, center=False).mean() + 2 * DATA['Close'].rolling(window=80, min_periods=1, center=False).std()
         signals_two['lower_BB'] = DATA['Close'].rolling(window=80, min_periods=1, center=False).mean() - 2 * DATA['Close'].rolling(window=80, min_periods=1, center=False).std()
         ax = signals_two[['upper_BB', 'lower_BB']].plot(ax=ax1, lw=1, alpha=0.4, color="black")
-        ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha='0.4')
+        ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha=0.4)
         
         # Plot the short and long moving averages
         signals[['short_mavg', 'long_mavg']].plot(ax=ax1, lw=2.)
@@ -428,7 +427,7 @@ def three_year_report(tickerlist):
         plt.title(ticker + " 3 Year Moving Average Crossover")
         plt.show()
         filename = ticker + "_3year_report.png"
-        fig.savefig(r"C:\Users\jcabr\OneDrive\Documents\StockAnalysis\Results\%s" %(filename))
+        fig.savefig(r"Results/%s" %(filename))
 
 
 ##NOT CURRENTLY IMPLEMENTED
