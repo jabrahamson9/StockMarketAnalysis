@@ -1,4 +1,6 @@
-# Stock Market Analysis
+### Stock Market Analysis
+
+# CSCI 4502 Final Project
 
 Team Members: JC Abrahamson, Garrett Hempy, Kevin Ruby, Jameson Marzak
 
