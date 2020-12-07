@@ -12,7 +12,7 @@ Background: The purpose of this project is to bring many of the evaluation tools
 Our code relies on file systems that use single back slashes (/) to sepearate directories. Running this program in a Windows environment will cause errors.
 
 
-COMMANDS NECESSARY:
+# COMMANDS NECESSARY:
 
 pip install opencv-python
 
