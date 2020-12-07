@@ -1,3 +1,11 @@
+import os
+
+os.system("pip install pandas_datareader")
+os.system("pip install fpdf")
+os.system("pip install opencv-python")
+os.system("pip install yfinance")
+os.system("pip install reportlab")
+
 
 import pandas_datareader as pdr
 import datetime
@@ -5,17 +13,20 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-import os
 import cv2
 
-
-import smtplib 
+import email, smtplib, ssl
 from email.mime.multipart import MIMEMultipart 
 from email.mime.text import MIMEText 
 from email.mime.base import MIMEBase 
 from email import encoders 
 
+from fpdf import FPDF  
+import unite_multiple_pictures_into_pdf
+
 tickerlist = ['LULU', 'TSN',  'ENPH', 'AMD']
+
+
 
 def two_week_window(tickerlist):
     for ticker in tickerlist:
@@ -432,94 +443,52 @@ def three_year_report(tickerlist):
         
 
 
-
-def load_images_from_folder(folder):    
-    images = []
-    for filename in os.listdir(os.getcwd() +'/' + folder):
-        img = cv2.imread(os.path.join(folder,filename))
-        if img is not None:
-            images.append(img)
-    return images
-
-
 ## EMAIL NOT CURRENTLY IMPLEMENTED
-# PDF Report Works Perfectly
 
 def create_report(tickerlist):
-    import email, smtplib, ssl
-    from email import encoders
-    from email.mime.base import MIMEBase
-    from email.mime.multipart import MIMEMultipart
-    from email.mime.text import MIMEText
-    from fpdf import FPDF
     
-    import unite_multiple_pictures_into_pdf
     os.system("python3 unite_multiple_pictures_into_pdf.py")
     
+    subject = "An email with attachment from Python"
+    body = "This is an email with attachment sent from Python"
+    sender_email = "stockanalysis553@gmail.com"
+    receiver_email = "jama6264@colorado.edu"
+    password = "stocksarecool9853!"
+     # Create a multipart message and set headers
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["To"] = receiver_email
+    message["Subject"] = subject
+    # message["Bcc"] = receiver_email  # Recommended for mass emails
     
+    # Add body to email
+    message.attach(MIMEText(body, "plain"))
     
-    # pdf = FPDF(orientation = "L")
-    # pdf.set_auto_page_break(0)
-    # imagelist = []
-    # imagelist = load_images_from_folder(r"Results")
-    # print(len(imagelist))
-    # for image in imagelist:
-        # pdf.add_page()
-        # pdf.image(image,w=270)
-    # pdf.output(os.getcwd() + '/Results/' + "FinalResults.pdf", dest="F")
-
-
-    # imagelist = os.listdir(r"Results")
-    # print(imagelist)
-    # pdf = FPDF()
-    # imagelist is the list with all image filenames
-    # for image in imagelist:
-        # pdf.add_page()
-        # pdf.image(r"Results/%s" %(image))
-    # pdf.output("pdftest.pdf", "F")
-    # pdf.output(name = 'FinalResults.pdf', dest = "F")
+    filename = "FinalResults_ALL_1-20_of_20.pdf"  # In same directory as script
     
-#     subject = "An email with attachment from Python"
-#     body = "This is an email with attachment sent from Python"
-#     sender_email = "stockpositionanalysis@gmail.com"
-#     receiver_email = "jcabrahamson9@gmail.com@gmail.com"
-#     password = "---"
-#     # Create a multipart message and set headers
-#     message = MIMEMultipart()
-#     message["From"] = "stockpositionanalysis@gmail.com"
-#     message["To"] = "jcabrahamson9@gmail.com@gmail.com"
-#     message["Subject"] = subject
-# #    message["Bcc"] = receiver_email  # Recommended for mass emails
+    # Open PDF file in binary mode
+    filepath = os.getcwd() + '/Results/' + filename
+    with open(filepath, "rb") as attachment:
+        # Add file as application/octet-stream
+        # Email client can usually download this automatically as attachment
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload(attachment.read())
     
-#     # Add body to email
-#     message.attach(MIMEText(body, "plain"))
+    # Encode file in ASCII characters to send by email    
+    encoders.encode_base64(part)
     
-#     filename = "LULU_1year_report.png"  # In same directory as script
+    # Add header as key/value pair to attachment part
+    part.add_header("Content-Disposition",f"attachment; filename= {filename}",)
     
-#     # Open PDF file in binary mode
-#     with open(filename, "rb") as attachment:
-#         # Add file as application/octet-stream
-#         # Email client can usually download this automatically as attachment
-#         part = MIMEBase("application", "octet-stream")
-#         part.set_payload(attachment.read())
+     # Add attachment to message and convert message to string
+    message.attach(part)
+    text = message.as_string()
     
-#     # Encode file in ASCII characters to send by email    
-#     encoders.encode_base64(part)
-    
-#     # Add header as key/value pair to attachment part
-#     part.add_header(
-#         "Content-Disposition",
-#         f"attachment; filename= {filename}",)
-    
-#     # Add attachment to message and convert message to string
-#     message.attach(part)
-#     text = message.as_string()
-    
-#     # Log in to server using secure context and send email
-#     context = ssl.create_default_context()
-#     with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-#         server.login(sender_email, password)
-#         server.sendmail(sender_email, receiver_email, text)
+     # Log in to server using secure context and send email
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        server.login("stockanalysis553", password)
+        server.sendmail(sender_email, receiver_email, text)
     
     
 def main(tickerlist):
