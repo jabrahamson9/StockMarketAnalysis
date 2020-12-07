@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import os
+import cv2
 
 
 import smtplib 
@@ -428,28 +429,55 @@ def three_year_report(tickerlist):
         plt.show()
         filename = ticker + "_3year_report.png"
         fig.savefig(r"Results/%s" %(filename))
+        
 
 
-##NOT CURRENTLY IMPLEMENTED
+
+def load_images_from_folder(folder):    
+    images = []
+    for filename in os.listdir(os.getcwd() +'/' + folder):
+        img = cv2.imread(os.path.join(folder,filename))
+        if img is not None:
+            images.append(img)
+    return images
+
+
+## EMAIL NOT CURRENTLY IMPLEMENTED
+# PDF Report Works Perfectly
+
 def create_report(tickerlist):
     import email, smtplib, ssl
     from email import encoders
     from email.mime.base import MIMEBase
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
-    import os
     from fpdf import FPDF
+    
+    import unite_multiple_pictures_into_pdf
+    os.system("python3 unite_multiple_pictures_into_pdf.py")
+    
+    
+    
+    # pdf = FPDF(orientation = "L")
+    # pdf.set_auto_page_break(0)
+    # imagelist = []
+    # imagelist = load_images_from_folder(r"Results")
+    # print(len(imagelist))
+    # for image in imagelist:
+        # pdf.add_page()
+        # pdf.image(image,w=270)
+    # pdf.output(os.getcwd() + '/Results/' + "FinalResults.pdf", dest="F")
 
 
-    imagelist = os.listdir(r"C:\Users\jcabr\OneDrive\Documents\StockAnalysis\Results")
-    print(imagelist)
-    pdf = FPDF()
+    # imagelist = os.listdir(r"Results")
+    # print(imagelist)
+    # pdf = FPDF()
     # imagelist is the list with all image filenames
-    for image in imagelist:
-        pdf.add_page()
-        pdf.image(r"C:\Users\jcabr\OneDrive\Documents\StockAnalysis\Results\%s" %(image))
-    #pdf.output("pdftest.pdf", "F")
-    pdf.output(name = 'pdftest.pdf', dest = "F")
+    # for image in imagelist:
+        # pdf.add_page()
+        # pdf.image(r"Results/%s" %(image))
+    # pdf.output("pdftest.pdf", "F")
+    # pdf.output(name = 'FinalResults.pdf', dest = "F")
     
 #     subject = "An email with attachment from Python"
 #     body = "This is an email with attachment sent from Python"
@@ -500,7 +528,7 @@ def main(tickerlist):
     three_year_report(tickerlist)
     monthly_report(tickerlist)
     two_week_report(tickerlist)
-#    create_report(tickerlist)
+    create_report(tickerlist)
 
 if __name__ == "__main__":
     main(tickerlist)
