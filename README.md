@@ -10,3 +10,4 @@ COMMANDS NECESSARY:
 pip install opencv-python
 pip install fpdf
 pip install pandas_datareader
+pip install yfinance
