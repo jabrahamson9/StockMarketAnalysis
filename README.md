@@ -15,3 +15,5 @@ pip install fpdf
 pip install pandas_datareader
 
 pip install yfinance
+
+pip install reportlab
