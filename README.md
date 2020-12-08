@@ -9,6 +9,10 @@ Background: The purpose of this project is to bring many of the evaluation tools
 
 # Instructions to Run
 
-Download the repository and execute this command in a Python environment: python3 dailtstockposition.py
+Download the repository and install Python 3 (if not already installed)
+
+Navigate to the StockMarketAnalysis folder and open a terminal.
+
+Execute this command: python3 dailtstockposition.py
 
 Enter your email when prompted, and the results will be sent to your inbox!
