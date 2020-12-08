@@ -39,7 +39,7 @@ def unite_pictures_into_pdf(outputPdfName, pathToSavePdfTo, pathToPictures, spli
     
     
     if picturesAreInRootFolder == False:
-        foldersInsideFolderWithPictures = sorted_nicely(glob.glob(pathToPictures + "/*/"))
+        foldersInsideFolderWithPictures = sorted_nicely(glob.glob(pathToPictures + "//*//"))
         if len(foldersInsideFolderWithPictures) != 0:
             picturesPathsForEachFolder = []
             for iFolder in foldersInsideFolderWithPictures:
@@ -123,7 +123,7 @@ def unite_pictures_into_pdf(outputPdfName, pathToSavePdfTo, pathToPictures, spli
     if picturesAreInRootFolder == True:
         picturesInsideFolderWithPictures = []
         for iExtension in listWithImagesExtensions:
-            picturesInsideFolderWithPictures.extend(glob.glob(pathToPictures + "/*." + iExtension))
+            picturesInsideFolderWithPictures.extend(glob.glob(pathToPictures + "//*." + iExtension))
         picturesInsideFolderWithPictures = sorted_nicely(picturesInsideFolderWithPictures)
         if len(picturesInsideFolderWithPictures) != 0:
             if splitType == "picture":
@@ -175,8 +175,8 @@ def unite_pictures_into_pdf(outputPdfName, pathToSavePdfTo, pathToPictures, spli
 if __name__ == "__main__":
    
     outputPdfName = "FinalResults"
-    pathToSavePdfTo = os.getcwd() + '/' + "Results"
-    pathToPictures = os.getcwd() + '/' + "Results"
+    pathToSavePdfTo = os.getcwd() + '//' + "Results"
+    pathToPictures = os.getcwd() + '//' + "Results"
     splitType = "picture"
     numberOfEntitiesInOnePdf = 20
     listWithImagesExtensions = ["png"]
