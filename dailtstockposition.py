@@ -26,7 +26,34 @@ import unite_multiple_pictures_into_pdf
 
 tickerlist = ['LULU', 'TSN',  'ENPH', 'AMD']
 
+def topTicks():
+   dataL = []
+   rec = []
+   with open('tick.txt','r') as file:
+       for line in file:
+        data = line.split()
+        dataL.append(data)
+   for i in range(0,500):
+       max1 = 0.0
+       max = []
+       for j in range(len(dataL)):
+            if float(dataL[j][1]) > max1:
+                max1 = float(dataL[j][1])
+                max = dataL[j]
+       rec.append(max)
+       dataL.remove(max)
+   
+   for x in range(len(rec)):
+       del rec[x][1]
+       del rec[x][1]
+   with open('recommendations.txt', 'w') as fileW:
+    for item in rec:
+        fileW.write("%s\n" % item)
 
+        
+    
+   print(fileW)
+    
 
 def two_week_window(tickerlist):
     for ticker in tickerlist:
@@ -492,12 +519,13 @@ def create_report(tickerlist):
     
     
 def main(tickerlist):
-    quarterly_report(tickerlist)
-    yearly_report(tickerlist)
-    three_year_report(tickerlist)
-    monthly_report(tickerlist)
-    two_week_report(tickerlist)
-    create_report(tickerlist)
+    #quarterly_report(tickerlist)
+   # yearly_report(tickerlist)
+    #three_year_report(tickerlist)
+   # monthly_report(tickerlist)
+    #two_week_report(tickerlist)
+    #create_report(tickerlist)
+    topTicks()
 
 if __name__ == "__main__":
     main(tickerlist)
