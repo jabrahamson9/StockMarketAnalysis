@@ -50,6 +50,7 @@ def StoOsc(ticker, DATA, graph):
         DATA['Close'].plot(ax=axes[0]); axes[0].set_title('Close')
         DATA[['%K','%D']].plot(ax=axes[1]); axes[1].set_title('Oscillator')
         plt.show()
+        
     return list(DATA['%K']), list(DATA['%D'])
 
 def MA(ticker, DATA, graph):
