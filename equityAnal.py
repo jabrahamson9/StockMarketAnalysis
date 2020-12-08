@@ -8,46 +8,33 @@ import numpy as np
 tickerlist = ['LULU', 'TSN']
 
 def RSI(ticker, DATA):
-    # DATA = pdr.get_data_yahoo(ticker,
-    #                         start = datetime.datetime.today() - timedelta(days=daysBack+14),
-    #                         end = datetime.datetime.today())
     DATA.index = pd.to_datetime(DATA.index).strftime('%Y-%m-%d')
     avgUp = []
     avgDown = []
-    for i in range(len(DATA)-14):
-        up = []
-        down = []
-        prevClose = DATA.at[DATA.index[i], 'Close']
-        # print(prevClose)
-        base = datetime.datetime.strptime(DATA.index[i], '%Y-%m-%d')
-        date_list = [base + timedelta(days=x) for x in range(14)]
-        # print(date_list)
-        count = 0
-        for index, row in DATA.iterrows():
-            index = datetime.datetime.strptime(index, '%Y-%m-%d')
-            if index in date_list:
-                count = count + 1
-                if row['Close'] > prevClose:
-                    up.append(row['Close']-prevClose)
-                elif row['Close'] < prevClose:
-                    down.append(prevClose - row['Close'])
-                prevClose = row['Close']
-        if len(up) == 0:
-            avgUp.append(0)
-        else:
-            avgUp.append(sum(up)/len(up))
-        if len(down) == 0:   
-            avgDown.append(0)
-        else:
-            avgDown.append(sum(down)/len(down))
-    RSI = []
-    for x in range(len(avgUp)):
-        if avgDown[x] != 0:
-            RSvalue = (avgUp[x] / avgDown[x])
-        else:
-            Svalue = (avgUp[x] / 1)
-        RSI.append(100 - (100 / (1+RSvalue)))
+    up = []
+    down = []
+    for i in range(14, -1, -1):
+        prev = DATA.index[len(DATA) - i - 2]
+        curr = DATA.index[len(DATA) - i - 1]
+        prevClose = DATA.at[prev, 'Close']
+        curClose = DATA.at[curr, 'Close']
+        if curClose > prevClose:
+            up.append(curClose - prevClose)
+        elif curClose < prevClose:
+            down.append(prevClose - curClose)
+    if len(up) == 0:
+        avgUp = 0
+    else:
+        avgUp = sum(up) / len(up)
+    if len(down) == 0:   
+        avgDown = 1
+    else:
+        avgDown = sum(down) / len(down)
+   
+    RSvalue = avgUp / avgDown
+    RSI = 100 - (100 / (1 + RSvalue))
     return RSI
+
 
 
 def StoOsc(ticker, DATA, graph):
@@ -115,16 +102,13 @@ def stockVal(ticker, daysBack, graph):
     DATA = pdr.get_data_yahoo(ticker,
                             start = datetime.datetime.today() - timedelta(days=daysBack),
                             end = datetime.datetime.today())   
-    DATA_RSI = pdr.get_data_yahoo(ticker,
-                            start = datetime.datetime.today() - timedelta(days=daysBack+14),
-                            end = datetime.datetime.today())   
 
     Boll_Val = 0
     Sto_Val = 0
     MA_Val = 0
     RSI_Val = 0
 
-    RSI_arr = RSI(tickerlist, DATA_RSI)
+    RSI_v = RSI(tickerlist, DATA)
     K,D = StoOsc(tickerlist, DATA, graph)
     sig, shortMA, longMA = MA(tickerlist, DATA, graph)
     up, low, close = Boll(tickerlist, DATA, graph)
@@ -139,9 +123,9 @@ def stockVal(ticker, daysBack, graph):
     elif close[-1] < low[-1]:
         Boll_Val = 1
 
-    if RSI_arr[-1] >= 70:
+    if RSI_v >= 70:
         RSI_Val = -1 + ((100 - RSI_arr[-1]) * 0.01)
-    elif RSI_arr[-1] <= 20:
+    elif RSI_v <= 20:
         RSI_Val = 1 - (20 - (RSI_arr[-1]) * 0.01)
 
     MA_idx = 0
@@ -181,5 +165,52 @@ def stockVal(ticker, daysBack, graph):
     power = Boll_Val + Sto_Val + MA_Val + RSI_Val
     return power
 
-power = stockVal('MSFT', 365, True)
+power = stockVal('MSFT', 365, False)
 print(power)
+
+
+
+
+
+
+# def RSI(ticker, DATA):
+#     # DATA = pdr.get_data_yahoo(ticker,
+#     #                         start = datetime.datetime.today() - timedelta(days=daysBack+14),
+#     #                         end = datetime.datetime.today())
+#     DATA.index = pd.to_datetime(DATA.index).strftime('%Y-%m-%d')
+#     avgUp = []
+#     avgDown = []
+#     for i in range(len(DATA)-14):
+#         up = []
+#         down = []
+#         prevClose = DATA.at[DATA.index[i], 'Close']
+#         # print(prevClose)
+#         base = datetime.datetime.strptime(DATA.index[i], '%Y-%m-%d')
+#         date_list = [base + timedelta(days=x) for x in range(14)]
+#         # print(date_list)
+#         count = 0
+#         for index, row in DATA.iterrows():
+#             index = datetime.datetime.strptime(index, '%Y-%m-%d')
+#             if index in date_list:
+#                 count = count + 1
+#                 if row['Close'] > prevClose:
+#                     up.append(row['Close']-prevClose)
+#                 elif row['Close'] < prevClose:
+#                     down.append(prevClose - row['Close'])
+#                 prevClose = row['Close']
+#         if len(up) == 0:
+#             avgUp.append(0)
+#         else:
+#             avgUp.append(sum(up)/len(up))
+#         if len(down) == 0:   
+#             avgDown.append(0)
+#         else:
+#             avgDown.append(sum(down)/len(down))
+#     RSI = []
+#     for x in range(len(avgUp)):
+#         if avgDown[x] != 0:
+#             RSvalue = (avgUp[x] / avgDown[x])
+#         else:
+#             Svalue = (avgUp[x] / 1)
+#         RSI.append(100 - (100 / (1+RSvalue)))
+#     return RSI
