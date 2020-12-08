@@ -5,7 +5,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-tickerlist = ['LULU', 'TSN']
 
 def RSI(ticker, DATA):
     DATA.index = pd.to_datetime(DATA.index).strftime('%Y-%m-%d')
@@ -125,17 +124,19 @@ def stockVal(ticker, daysBack, graph):
         Boll_Val = 1
 
     if RSI_v >= 70:
-        RSI_Val = -1 + ((100 - RSI_arr[-1]) * 0.01)
+        RSI_Val = -1 + ((100 - RSI_v) * 0.05)
     elif RSI_v <= 20:
-        RSI_Val = 1 - (20 - (RSI_arr[-1]) * 0.01)
-
+        RSI_Val = 1 - (20 - (RSI_v) * 0.05)
+    elif RSI_v >= 50:
+        RSI_Val = RSI_v / 100
+    else:
+        RSI_Val = (RSI_v / 100) * (-1)
     MA_idx = 0
     STO_idx = 0
     for i in range(len(close)):
         if shortMA[i] > longMA[i] and prev_short < prev_long:
             MA_Val = 1
             MA_idx = i
-
         elif shortMA[i] < longMA[i] and prev_short > prev_long:
             MA_Val = -1
             MA_idx = i
@@ -152,25 +153,39 @@ def stockVal(ticker, daysBack, graph):
         prev_D = D[i]
 
     if MA_Val == 1:
-        MA_Val = MA_Val - ((len(close)-MA_idx) * 0.01)
+        MA_Val = MA_Val - ((len(close)-MA_idx) * 0.05)
+        if MA_Val < 0:
+            MA_Val = 0
     elif MA_Val == -1:
-        MA_Val = MA_Val + ((len(close)-MA_idx) * 0.01)
+        MA_Val = MA_Val + ((len(close)-MA_idx) * 0.05)
+        if MA_Val > 0:
+            MA_Val = 0
 
     if Sto_Val == 1:
-        Sto_Val = Sto_Val - ((len(close)-STO_idx) * 0.01)
+        Sto_Val = Sto_Val - ((len(close)-STO_idx) * 0.05)
+        if Sto_Val < 0:
+            Sto_Val = 0
     elif Sto_Val == -1:
-        Sto_Val = Sto_Val + ((len(close)-STO_idx) * 0.01)
+        Sto_Val = Sto_Val + ((len(close)-STO_idx) * 0.05)
+        if Sto_Val > 0:
+            Sto_Val = 0
     
-    print(Boll_Val, Sto_Val, MA_Val, RSI_Val)
+    # print(Boll_Val, Sto_Val, MA_Val, RSI_Val)
     
     power = Boll_Val + Sto_Val + MA_Val + RSI_Val
     return power
 
-power = stockVal('MSFT', 365, False)
-print(power)
+
+tickerlist = ['LULU', 'AAPL', 'NKE', 'GOOG', 'MSFT', 'TSLA', 'ATRA', 'SNE', 'UAL']
 
 
+def main(tickerlist):
+    for ticker in tickerlist:
+        power = stockVal(ticker, 365, False)
+        print(ticker, ": ", power)
 
+if __name__ == "__main__":
+    main(tickerlist)
 
 
 

@@ -45,7 +45,7 @@ def topTicks():
             del rec[x][1]
     with open('recommendations.txt', 'w') as fileW:
         for item in rec:
-            fileW.write("%s\n" % item) 
+            fileW.write("%s\n" % str(item)[2:-2])
     print(fileW)
     
 
