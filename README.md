@@ -13,6 +13,6 @@ Download the repository and install Python 3 (if not already installed)
 
 Navigate to the StockMarketAnalysis folder and open a terminal.
 
-Execute this command: python3 dailtstockposition.py
+Execute this command: python3 dailystockposition.py
 
 Enter your email when prompted, and the results will be sent to your inbox!
