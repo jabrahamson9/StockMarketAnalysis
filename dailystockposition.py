@@ -13,8 +13,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-import cv2
-
 import email, smtplib, ssl
 from email.mime.multipart import MIMEMultipart 
 from email.mime.text import MIMEText 
@@ -26,6 +24,30 @@ import unite_multiple_pictures_into_pdf
 
 tickerlist = ['LULU', 'TSN',  'ENPH', 'AMD']
 
+def topTicks():
+    dataL = []
+    rec = []
+    with open('tick.txt','r') as file:
+        for line in file:
+            data = line.split()
+            dataL.append(data)
+        for i in range(0,500):
+            max1 = 0.0
+            max = []
+            for j in range(len(dataL)):
+                if float(dataL[j][1]) > max1:
+                    max1 = float(dataL[j][1])
+                    max = dataL[j]
+            rec.append(max)
+            dataL.remove(max)
+        for x in range(len(rec)):
+            del rec[x][1]
+            del rec[x][1]
+    with open('recommendations.txt', 'w') as fileW:
+        for item in rec:
+            fileW.write("%s\n" % item) 
+    print(fileW)
+    
 
 
 def two_week_window(tickerlist):
@@ -498,6 +520,7 @@ def main(tickerlist):
     two_week_report(tickerlist)
     user_email = input("Enter email for the analytics report: ")
     create_report(tickerlist,user_email)
+    topTicks()
 
 if __name__ == "__main__":
     main(tickerlist)
