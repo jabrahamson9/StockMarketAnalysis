@@ -22,7 +22,7 @@ from email import encoders
 from fpdf import FPDF  
 import unite_multiple_pictures_into_pdf
 
-tickerlist = ['LULU', 'TSN',  'ENPH', 'AMD']
+tickerlist = ['LULU']
 
 def topTicks():
     dataL = []
@@ -380,6 +380,8 @@ def yearly_report(tickerlist):
         # Add a subplot and label for y-axis
         ax1 = fig.add_subplot(111,  ylabel='Price in $')
         # Plot the closing price
+        print(signals.loc[signals.positions == 1.0].index)
+        print(signals.short_mavg[signals.positions == 1.0])
         DATA['Close'].plot(ax=ax1, color='r', lw=2.)
         signals_two = pd.DataFrame(index=DATA.index)
         
@@ -388,7 +390,7 @@ def yearly_report(tickerlist):
         signals_two['lower_BB'] = DATA['Close'].rolling(window=30, min_periods=1, center=False).mean() - 2 * DATA['Close'].rolling(window=30, min_periods=1, center=False).std()
         ax = signals_two[['upper_BB', 'lower_BB']].plot(ax=ax1, lw=1, alpha=0.4, color="black")
         ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha=0.4)
-        
+        print(signals['positions'])
         # Plot the short and long moving averages
         signals[['short_mavg', 'long_mavg']].plot(ax=ax1, lw=2.)
         # Plot the buy signals
@@ -513,14 +515,14 @@ def create_report(tickerlist,user_email):
     
     
 def main(tickerlist):
-    quarterly_report(tickerlist)
+    # quarterly_report(tickerlist)
     yearly_report(tickerlist)
-    three_year_report(tickerlist)
-    monthly_report(tickerlist)
-    two_week_report(tickerlist)
-    user_email = input("Enter email for the analytics report: ")
-    create_report(tickerlist,user_email)
-    topTicks()
+    # three_year_report(tickerlist)
+    # monthly_report(tickerlist)
+    # two_week_report(tickerlist)
+    # user_email = input("Enter email for the analytics report: ")
+    # create_report(tickerlist,user_email)
+    # topTicks()
 
 if __name__ == "__main__":
     main(tickerlist)
