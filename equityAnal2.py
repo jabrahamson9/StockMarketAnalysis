@@ -181,20 +181,35 @@ def stockVal(ticker, daysBack, graph):
 
 
 # tickerlist = ['LULU', 'AAPL', 'NKE', 'GOOG', 'MSFT', 'TSLA', 'ATRA', 'SNE', 'UAL']
-tickerlist = ['LULU', 'AAPL']
+tickerlist = ['FATE', 'OPTT', 'VXRT', 'IGMS']
 
 file1 = open('recommendations.txt', "r")
 
-# DATA = pdr.get_data_yahoo('LULU',
-#                         start = datetime.datetime.today() - timedelta(days=365),
-#                         end = datetime.datetime.today() )   
-# MA('LULU', DATA, True)
+  
+
+def results(ticker):
+    DATA = pdr.get_data_yahoo(ticker,
+                            start = datetime.datetime.today() - timedelta(days=500),
+                            end = datetime.datetime.today() ) 
+    fig = plt.figure(figsize=(6, 4))
+    ax1 = fig.add_subplot(111,  ylabel='Price in $')
+    DATA['Close'].plot(ax=ax1, color='r', lw=2.0)
+    if ticker == 'OPTT':
+        plt.axvline(datetime.datetime(2019, 11, 15))
+    else:
+        plt.axvline(datetime.datetime(2019, 11, 9))
+    plt.title(ticker + " Performance Analysis")
+    plt.show()
+    filename = str(ticker) + "_ANALYSIS.png"
+    fig.savefig(filename)
 
 
 def main(tickerlist):
-    for ticker in tickerlist:
-        power = stockVal(ticker, 365, True)
-        print(ticker, ": ", power)
+
+
+    # for ticker in tickerlist:
+    #     power = stockVal(ticker, 365, True)
+    #     print(ticker, ": ", power)
 
 
     # vals = {}
@@ -208,6 +223,10 @@ def main(tickerlist):
     #         pass
     # res = dict(sorted(vals.items(), key = itemgetter(1), reverse = True)[:10]) 
     # print(res) 
+
+    for ticker in tickerlist:
+        results(ticker)
+
 
 if __name__ == "__main__":
     main(tickerlist)
