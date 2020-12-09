@@ -1,9 +1,27 @@
+import os
+
+# os.system("pip install pandas_datareader")
+# os.system("pip install fpdf")
+# os.system("pip install opencv-python")
+# os.system("pip install yfinance")
+# os.system("pip install reportlab")
+
 import pandas_datareader as pdr
 import datetime
 from datetime import timedelta
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+
+
+import email, smtplib, ssl
+from email.mime.multipart import MIMEMultipart 
+from email.mime.text import MIMEText 
+from email.mime.base import MIMEBase 
+from email import encoders 
+
+from fpdf import FPDF  
+import unite_multiple_pictures_into_pdf
 
 
 def RSI(ticker, DATA):
@@ -36,7 +54,8 @@ def RSI(ticker, DATA):
 
 
 
-def StoOsc(ticker, DATA, graph):
+def StoOsc(ticker, DATA, graph, numDays):
+    print(ticker)
     DATA['L14'] = DATA['Low'].rolling(window=14).min()
     #Create the "H14" column in the DataFrame
     DATA['H14'] = DATA['High'].rolling(window=14).max()
@@ -48,12 +67,13 @@ def StoOsc(ticker, DATA, graph):
         fig, axes = plt.subplots(nrows=2, ncols=1,figsize=(15,7))
         DATA['Close'].plot(ax=axes[0]); axes[0].set_title('Close')
         DATA[['%K','%D']].plot(ax=axes[1]); axes[1].set_title('Oscillator')
-        plt.show()
+        # plt.show()
         filename = str(ticker) + "_STO.png"
+        plt.title(str(ticker) + " " + numDays + " Day(s) Oscillation")
         fig.savefig(r"Results/%s" %(filename))
     return list(DATA['%K']), list(DATA['%D'])
 
-def MA(ticker, DATA, graph):
+def MA(ticker, DATA, graph, numDays):
     short_window = 5
     long_window = 30
     # Initialize the `signals` DataFrame with the `signal` column
@@ -68,29 +88,28 @@ def MA(ticker, DATA, graph):
     signals['signal'][short_window:] = np.where(signals['short_mavg'][short_window:] > signals['long_mavg'][short_window:], 1.0, 0.0)   
     # Generate trading orders
     signals['positions'] = signals['signal'].diff()
-    # Initialize the plot figure
-    fig = plt.figure(figsize=(6, 4))
-    # Add a subplot and label for y-axis
-    ax1 = fig.add_subplot(111,  ylabel='Price in $')
     if graph == True:
-        print(signals.loc[signals.positions == 1.0].index)
-        print(signals.short_mavg[signals.positions == 1.0])
+        # Initialize the plot figure
+        fig = plt.figure(figsize=(6, 4))
+        # Add a subplot and label for y-axis
+        ax1 = fig.add_subplot(111,  ylabel='Price in $')
         DATA['Close'].plot(ax=ax1, color='r', lw=2.0)
         signals[['short_mavg', 'long_mavg']].plot(ax=ax1, lw=2.0)
         # Plot the buy signals
         ax1.plot(signals.loc[signals.positions == 1.0].index, 
-                 signals.short_mavg[signals.positions == 1.0],
-                 '^', markersize=10, color='m')
+                    signals.short_mavg[signals.positions == 1.0],
+                    '^', markersize=10, color='m')
         # Plot the sell signals
         ax1.plot(signals.loc[signals.positions == -1.0].index, 
-                 signals.short_mavg[signals.positions == -1.0],
-                 'v', markersize=10, color='k')
-        plt.show()
+                    signals.short_mavg[signals.positions == -1.0],
+                    'v', markersize=10, color='k')
+        # plt.show()
         filename = str(ticker) + "_MA.png"
+        plt.title(str(ticker) + " " + numDays + " Day(s) Moving Averages")
         fig.savefig(r"Results/%s" %(filename))
     return list(signals['positions']), list(signals['short_mavg']), list(signals['long_mavg'])
 
-def Boll(ticker, DATA, graph):
+def Boll(ticker, DATA, graph, numDays):
     signals_two = pd.DataFrame(index=DATA.index)
     signals_two['upper_BB'] = DATA['Close'].rolling(window=10, min_periods=1, center=False).mean() + 2 * DATA['Close'].rolling(window=10, min_periods=1, center=False).std()
     signals_two['lower_BB'] = DATA['Close'].rolling(window=10, min_periods=1, center=False).mean() - 2 * DATA['Close'].rolling(window=10, min_periods=1, center=False).std()
@@ -98,26 +117,28 @@ def Boll(ticker, DATA, graph):
         fig = plt.figure(figsize=(6, 4))
         ax1 = fig.add_subplot(111,  ylabel='Price in $')
         ax = signals_two[['upper_BB', 'lower_BB']].plot(ax=ax1, lw=1, alpha=0.4, color="black")
-        ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha='0.4')
+        ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha=0.4)
         DATA['Close'].plot(ax=ax1, color='r', lw=2.0)
-        plt.show()
+        # plt.show()
         filename = str(ticker) + "_BOLL.png"
+        plt.title(str(ticker) + " " + numDays + " Day(s) Bollinger Bands")
         fig.savefig(r"Results/%s" %(filename))
     return list(signals_two['upper_BB']), list(signals_two['lower_BB']), list(DATA['Close'])
 
 def stockVal(ticker, daysBack, graph):
     DATA = pdr.get_data_yahoo(ticker,
                             start = datetime.datetime.today() - timedelta(days=daysBack),
-                            end = datetime.datetime.today() )   
+                            end = datetime.datetime.today())   
+
     Boll_Val = 0
     Sto_Val = 0
     MA_Val = 0
     RSI_Val = 0
 
-    sig, shortMA, longMA = MA(ticker, DATA, graph)
     RSI_v = RSI(ticker, DATA)
-    K,D = StoOsc(ticker, DATA, graph)
-    up, low, close = Boll(ticker, DATA, graph)
+    K,D = StoOsc(ticker, DATA, graph, numDays)
+    sig, shortMA, longMA = MA(ticker, DATA, graph, numDays)
+    up, low, close = Boll(ticker, DATA, graph, numDays)
 
     prev_short = shortMA[0]
     prev_long = longMA[0]
@@ -176,48 +197,82 @@ def stockVal(ticker, daysBack, graph):
         if Sto_Val > 0:
             Sto_Val = 0
     
-    # print(Boll_Val, Sto_Val, MA_Val, RSI_Val)
+    print(Boll_Val, Sto_Val, MA_Val, RSI_Val)
     
     power = Boll_Val + Sto_Val + MA_Val + RSI_Val
     return power
 
 
+def create_report(tickerlist,user_email):
+    
+    os.system("python3 unite_multiple_pictures_into_pdf.py")
+    
+    subject = "An email with attachment from Python"
+    body = "This is an email with attachment sent from Python"
+    sender_email = "stockanalysis553@gmail.com"
+    receiver_email = user_email
+    password = "stocksarecool9853!"
+     # Create a multipart message and set headers
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["To"] = receiver_email
+    message["Subject"] = subject
+    # message["Bcc"] = receiver_email  # Recommended for mass emails
+    
+    # Add body to email
+    message.attach(MIMEText(body, "plain"))
+    
+    filename = "FinalAnalysis.pdf"  # In same directory as script
+    
+    # Open PDF file in binary mode
+    filepath = os.getcwd() + '/Results/' + filename
+    with open(filepath, "rb") as attachment:
+        # Add file as application/octet-stream
+        # Email client can usually download this automatically as attachment
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload(attachment.read())
+    
+    # Encode file in ASCII characters to send by email    
+    encoders.encode_base64(part)
+    
+    # Add header as key/value pair to attachment part
+    part.add_header("Content-Disposition",f"attachment; filename= {filename}",)
+    
+     # Add attachment to message and convert message to string
+    message.attach(part)
+    text = message.as_string()
+    
+     # Log in to server using secure context and send email
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        server.login("stockanalysis553", password)
+        server.sendmail(sender_email, receiver_email, text)
+    
+    
+    
+
 # tickerlist = ['LULU', 'AAPL', 'NKE', 'GOOG', 'MSFT', 'TSLA', 'ATRA', 'SNE', 'UAL']
 tickerlist = ['LULU', 'AAPL']
 
-file1 = open('recommendations.txt', "r")
-
-# DATA = pdr.get_data_yahoo('LULU',
-#                         start = datetime.datetime.today() - timedelta(days=365),
-#                         end = datetime.datetime.today() )   
-# MA('LULU', DATA, True)
-
-
-def main(tickerlist):
+def main(tickerlist,numDays):
     for ticker in tickerlist:
-        power = stockVal(ticker, 365, True)
+        power = stockVal(ticker, int(numDays), True)
         print(ticker, ": ", power)
 
-
-    # vals = {}
-    # for x in file1:
-    #     # x = file1.readline()
-    #     x = x[2:-3]
-    #     try:
-    #         power = stockVal(x, 365, False)
-    #         vals[x] = power
-    #     except:
-    #         pass
-    # res = dict(sorted(vals.items(), key = itemgetter(1), reverse = True)[:10]) 
-    # print(res)
-
 if __name__ == "__main__":
-    main(tickerlist)
+    numDays = input("Enter the number of days you want to analyze: ")
+    user_email = input("Enter email for the analytics report: ")
+    main(tickerlist,numDays)
+    create_report(tickerlist,user_email)
 
 
-
-
-
+    
+    
+    
+    
+    
+    
+    
 
 # def RSI(ticker, DATA):
 #     # DATA = pdr.get_data_yahoo(ticker,
