@@ -37,6 +37,7 @@ def RSI(ticker, DATA):
 
 
 def StoOsc(ticker, DATA, graph):
+    print(ticker)
     DATA['L14'] = DATA['Low'].rolling(window=14).min()
     #Create the "H14" column in the DataFrame
     DATA['H14'] = DATA['High'].rolling(window=14).max()
@@ -48,8 +49,9 @@ def StoOsc(ticker, DATA, graph):
         fig, axes = plt.subplots(nrows=2, ncols=1,figsize=(15,7))
         DATA['Close'].plot(ax=axes[0]); axes[0].set_title('Close')
         DATA[['%K','%D']].plot(ax=axes[1]); axes[1].set_title('Oscillator')
-        plt.show()
-        
+        # plt.show()
+        filename = str(ticker) + "_STO.png"
+        fig.savefig(r"Results/%s" %(filename))
     return list(DATA['%K']), list(DATA['%D'])
 
 def MA(ticker, DATA, graph):
@@ -82,20 +84,24 @@ def MA(ticker, DATA, graph):
         ax1.plot(signals.loc[signals.positions == -1.0].index, 
                     signals.short_mavg[signals.positions == -1.0],
                     'v', markersize=10, color='k')
-        plt.show()
+        # plt.show()
+        filename = str(ticker) + "_MA.png"
+        fig.savefig(r"Results/%s" %(filename))
     return list(signals['positions']), list(signals['short_mavg']), list(signals['long_mavg'])
 
 def Boll(ticker, DATA, graph):
-    fig = plt.figure(figsize=(6, 4))
-    ax1 = fig.add_subplot(111,  ylabel='Price in $')
     signals_two = pd.DataFrame(index=DATA.index)
     signals_two['upper_BB'] = DATA['Close'].rolling(window=10, min_periods=1, center=False).mean() + 2 * DATA['Close'].rolling(window=10, min_periods=1, center=False).std()
     signals_two['lower_BB'] = DATA['Close'].rolling(window=10, min_periods=1, center=False).mean() - 2 * DATA['Close'].rolling(window=10, min_periods=1, center=False).std()
     if graph == True:
+        fig = plt.figure(figsize=(6, 4))
+        ax1 = fig.add_subplot(111,  ylabel='Price in $')
         ax = signals_two[['upper_BB', 'lower_BB']].plot(ax=ax1, lw=1, alpha=0.4, color="black")
         ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha='0.4')
         DATA['Close'].plot(ax=ax1, color='r', lw=2.0)
-        plt.show()
+        # plt.show()
+        filename = str(ticker) + "_BOLL.png"
+        fig.savefig(r"Results/%s" %(filename))
     return list(signals_two['upper_BB']), list(signals_two['lower_BB']), list(DATA['Close'])
 
 def stockVal(ticker, daysBack, graph):
@@ -108,10 +114,10 @@ def stockVal(ticker, daysBack, graph):
     MA_Val = 0
     RSI_Val = 0
 
-    RSI_v = RSI(tickerlist, DATA)
-    K,D = StoOsc(tickerlist, DATA, graph)
-    sig, shortMA, longMA = MA(tickerlist, DATA, graph)
-    up, low, close = Boll(tickerlist, DATA, graph)
+    RSI_v = RSI(ticker, DATA)
+    K,D = StoOsc(ticker, DATA, graph)
+    sig, shortMA, longMA = MA(ticker, DATA, graph)
+    up, low, close = Boll(ticker, DATA, graph)
 
     prev_short = shortMA[0]
     prev_long = longMA[0]
@@ -170,18 +176,18 @@ def stockVal(ticker, daysBack, graph):
         if Sto_Val > 0:
             Sto_Val = 0
     
-    # print(Boll_Val, Sto_Val, MA_Val, RSI_Val)
+    print(Boll_Val, Sto_Val, MA_Val, RSI_Val)
     
     power = Boll_Val + Sto_Val + MA_Val + RSI_Val
     return power
 
 
-tickerlist = ['LULU', 'AAPL', 'NKE', 'GOOG', 'MSFT', 'TSLA', 'ATRA', 'SNE', 'UAL']
-
+# tickerlist = ['LULU', 'AAPL', 'NKE', 'GOOG', 'MSFT', 'TSLA', 'ATRA', 'SNE', 'UAL']
+tickerlist = ['LULU', 'AAPL']
 
 def main(tickerlist):
     for ticker in tickerlist:
-        power = stockVal(ticker, 365, False)
+        power = stockVal(ticker, 365, True)
         print(ticker, ": ", power)
 
 if __name__ == "__main__":
