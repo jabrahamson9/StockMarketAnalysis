@@ -4,7 +4,7 @@ from datetime import timedelta
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-
+from operator import itemgetter 
 
 def RSI(ticker, DATA):
     DATA.index = pd.to_datetime(DATA.index).strftime('%Y-%m-%d')
@@ -73,8 +73,6 @@ def MA(ticker, DATA, graph):
     # Add a subplot and label for y-axis
     ax1 = fig.add_subplot(111,  ylabel='Price in $')
     if graph == True:
-        print(signals.loc[signals.positions == 1.0].index)
-        print(signals.short_mavg[signals.positions == 1.0])
         DATA['Close'].plot(ax=ax1, color='r', lw=2.0)
         signals[['short_mavg', 'long_mavg']].plot(ax=ax1, lw=2.0)
         # Plot the buy signals
@@ -107,8 +105,8 @@ def Boll(ticker, DATA, graph):
 
 def stockVal(ticker, daysBack, graph):
     DATA = pdr.get_data_yahoo(ticker,
-                            start = datetime.datetime.today() - timedelta(days=daysBack),
-                            end = datetime.datetime.today() )   
+                            start = datetime.datetime.today() - timedelta(days=2*daysBack),
+                            end = datetime.datetime.today() - timedelta(days=daysBack))   
     Boll_Val = 0
     Sto_Val = 0
     MA_Val = 0
@@ -209,7 +207,7 @@ def main(tickerlist):
     #     except:
     #         pass
     # res = dict(sorted(vals.items(), key = itemgetter(1), reverse = True)[:10]) 
-    # print(res)
+    # print(res) 
 
 if __name__ == "__main__":
     main(tickerlist)
