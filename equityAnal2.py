@@ -74,7 +74,7 @@ def StoOsc(ticker, DATA, graph):
         DATA['Close'].plot(ax=axes[0]); axes[0].set_title('Close')
         DATA[['%K','%D']].plot(ax=axes[1]); axes[1].set_title('Oscillator')
         plt.title(ticker + " Stochastic Oscillator - 1 Year ")
-        plt.show()
+        # plt.show()
         filename = str(ticker) + "_STO.png"
         fig.savefig(r"Results/%s" %(filename))
     return list(DATA['%K']), list(DATA['%D'])
@@ -94,11 +94,11 @@ def MA(ticker, DATA, graph):
     signals['signal'][short_window:] = np.where(signals['short_mavg'][short_window:] > signals['long_mavg'][short_window:], 1.0, 0.0)   
     # Generate trading orders
     signals['positions'] = signals['signal'].diff()
-    # Initialize the plot figure
-    fig = plt.figure(figsize=(6, 4))
-    # Add a subplot and label for y-axis
-    ax1 = fig.add_subplot(111,  ylabel='Price in $')
     if graph == True:
+        # Initialize the plot figure
+        fig = plt.figure(figsize=(6, 4))
+        # Add a subplot and label for y-axis
+        ax1 = fig.add_subplot(111,  ylabel='Price in $')
         DATA['Close'].plot(ax=ax1, color='r', lw=2.0)
         signals[['short_mavg', 'long_mavg']].plot(ax=ax1, lw=2.0)
         # Plot the buy signals
@@ -110,7 +110,7 @@ def MA(ticker, DATA, graph):
                  signals.short_mavg[signals.positions == -1.0],
                  'v', markersize=10, color='k')
         plt.title(ticker + " LMA vs SMA - 1 Year ")
-        plt.show()
+        # plt.show()
         filename = str(ticker) + "_MA.png"
         fig.savefig(r"Results/%s" %(filename))
     return list(signals['positions']), list(signals['short_mavg']), list(signals['long_mavg'])
@@ -127,15 +127,15 @@ def Boll(ticker, DATA, graph):
         DATA['Close'].plot(ax=ax1, color='r', lw=2.0)
         plt.title(ticker + " Bollinger Band - 1 Year ")
 
-        plt.show()
+        # plt.show()
         filename = str(ticker) + "_BOLL.png"
         fig.savefig(r"Results/%s" %(filename))
     return list(signals_two['upper_BB']), list(signals_two['lower_BB']), list(DATA['Close'])
 
 def stockVal(ticker, daysBack, graph):
     DATA = pdr.get_data_yahoo(ticker,
-                            start = datetime.datetime.today() - timedelta(days=2*daysBack),
-                            end = datetime.datetime.today() - timedelta(days=daysBack))   
+                            start = datetime.datetime.today() - timedelta(days=daysBack),
+                            end = datetime.datetime.today())   
     Boll_Val = 0
     Sto_Val = 0
     MA_Val = 0
@@ -230,8 +230,6 @@ def results(ticker):
     fig.savefig(filename)
 
 def create_report(user_email):
-    
-    createRecommendationFile();
 
     subject = "Automated Stock Report"
     body = "This is an automated email with your in depth stock analytics."
@@ -250,6 +248,7 @@ def create_report(user_email):
     
     filename1 = "FinalAnalysis.pdf"  # In same directory as script\
     filename2 = "recommendedStocks.csv"
+    filename3 = "portfolioValues.csv"
     
     # Open PDF file in binary mode
     filepath1 = os.getcwd() + '/Results/' + filename1
@@ -277,6 +276,16 @@ def create_report(user_email):
     part.add_header("Content-Disposition",f"attachment; filename= {filename2}",)
     message.attach(part)
 
+    filepath3 = os.getcwd() + '/Results/' + filename3
+    with open(filepath3, "rb") as attachment:
+        # Add file as application/octet-stream
+        # Email client can usually download this automatically as attachment
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload(attachment.read())
+
+    encoders.encode_base64(part)
+    part.add_header("Content-Disposition",f"attachment; filename= {filename3}",)
+    message.attach(part)
 
      # Add attachment to message and convert message to string
     message.attach(part)
@@ -318,23 +327,40 @@ def mainUI():
         tickers = extractTickers(e2.get())
         #cleanFolder()
 
+        portfolioDict = {}
         for ticker in tickers:
             power = stockVal(ticker, 365, True)
             print(ticker, ": ", power)
+            portfolioDict[ticker] = power
+
         #make long PDF
         callPDFSaver()
-        # #get recommendations
-        # vals = {}
-        # for x in file1:
-            # x = file1.readline()
-            # x = x[2:-3]
-            # try:
-                # power = stockVal(x, 365, False)
-                # vals[x] = power
-            # except:
-                # pass
-        # res = dict(sorted(vals.items(), key = itemgetter(1), reverse = True)[:10]) 
-        # print(res) 
+         #get recommendations
+        vals = {}
+        for x in file1:
+            x = file1.readline()
+            x = x[2:-3]
+            try:
+                power = stockVal(x, 365, False)
+                vals[x] = power
+            except:
+                pass
+        res = dict(sorted(vals.items(), key = itemgetter(1), reverse = True)[:10]) 
+        listofDicts = []
+        for key in res:
+            tmp = {'Ticker' : key , 'Value': res[key] }
+            listofDicts.append(tmp)
+
+        portfolioDictList = []
+        for key in portfolioDict:
+            tmp = {'Ticker' : key , 'Value': portfolioDict[key] }
+            portfolioDictList.append(tmp)
+           
+        recommendedFilename = "recommendedStocks.csv"
+        portfolioFilename = "portfolioValues.csv"
+        createRecommendationFile(listofDicts, recommendedFilename)
+        createRecommendationFile(portfolioDictList, portfolioFilename)
+        # print(listofDicts)
 
         #send email 
         create_report(email)
@@ -361,16 +387,9 @@ def mainUI():
     tk.mainloop()
 
 
-def createRecommendationFile():
+def createRecommendationFile(dict_data, filename):
     csv_columns = ['Ticker','Value']
-    dict_data = [
-        {'Ticker': 'AAPL', 'Value': 0.0},
-        {'Ticker': 'AMZN', 'Value': 0.0},
-        {'Ticker': 'GE', 'Value': 0.0},
-        {'Ticker': 'LULU', 'Value': 0.0},
-        {'Ticker': 'NVDA', 'Value': 0.0},
-    ]
-    csv_file = "recommendedStocks.csv"
+    csv_file = os.getcwd() + '/Results/' + filename
     try:
         with open(csv_file, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
@@ -382,77 +401,7 @@ def createRecommendationFile():
 
 
 def main():
-
-
     mainUI()
-    # for ticker in tickerlist:
-    #     power = stockVal(ticker, 365, True)
-    #     print(ticker, ": ", power)
-    #make long PDF
-    #get recommendations
-    # vals = {}
-    # for x in file1:
-    #     # x = file1.readline()
-    #     x = x[2:-3]
-    #     try:
-    #         power = stockVal(x, 365, False)
-    #         vals[x] = power
-    #     except:
-    #         pass
-    # res = dict(sorted(vals.items(), key = itemgetter(1), reverse = True)[:10]) 
-    # print(res) 
-    #send email
-
- 
-
-    # for ticker in tickerlist:
-    #     results(ticker)
-
 
 if __name__ == "__main__":
     main()
-
-
-
-
-# def RSI(ticker, DATA):
-#     # DATA = pdr.get_data_yahoo(ticker,
-#     #                         start = datetime.datetime.today() - timedelta(days=daysBack+14),
-#     #                         end = datetime.datetime.today())
-#     DATA.index = pd.to_datetime(DATA.index).strftime('%Y-%m-%d')
-#     avgUp = []
-#     avgDown = []
-#     for i in range(len(DATA)-14):
-#         up = []
-#         down = []
-#         prevClose = DATA.at[DATA.index[i], 'Close']
-#         # print(prevClose)
-#         base = datetime.datetime.strptime(DATA.index[i], '%Y-%m-%d')
-#         date_list = [base + timedelta(days=x) for x in range(14)]
-#         # print(date_list)
-#         count = 0
-#         for index, row in DATA.iterrows():
-#             index = datetime.datetime.strptime(index, '%Y-%m-%d')
-#             if index in date_list:
-#                 count = count + 1
-#                 if row['Close'] > prevClose:
-#                     up.append(row['Close']-prevClose)
-#                 elif row['Close'] < prevClose:
-#                     down.append(prevClose - row['Close'])
-#                 prevClose = row['Close']
-#         if len(up) == 0:
-#             avgUp.append(0)
-#         else:
-#             avgUp.append(sum(up)/len(up))
-#         if len(down) == 0:   
-#             avgDown.append(0)
-#         else:
-#             avgDown.append(sum(down)/len(down))
-#     RSI = []
-#     for x in range(len(avgUp)):
-#         if avgDown[x] != 0:
-#             RSvalue = (avgUp[x] / avgDown[x])
-#         else:
-#             Svalue = (avgUp[x] / 1)
-#         RSI.append(100 - (100 / (1+RSvalue)))
-#     return RSI
