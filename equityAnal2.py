@@ -1,3 +1,11 @@
+import os
+
+# os.system("python -m pip install pandas_datareader")
+# os.system("python -m pip install fpdf")
+# os.system("python -m pip install opencv-python")
+# os.system("python -m pip install yfinance")
+# os.system("python -m pip install reportlab")
+
 import pandas_datareader as pdr
 import datetime
 from datetime import timedelta
@@ -7,12 +15,21 @@ import numpy as np
 from operator import itemgetter
 import tkinter as tk
 
+import email, smtplib, ssl
+from email.mime.multipart import MIMEMultipart 
+from email.mime.text import MIMEText 
+from email.mime.base import MIMEBase 
+from email import encoders 
+
+from fpdf import FPDF  
+
 import glob
-import os
 import re
 from reportlab.lib import utils
 from reportlab.pdfgen import canvas
 from unite_multiple_pictures_into_pdf import sorted_nicely, unite_pictures_into_pdf
+
+import csv
 
 def RSI(ticker, DATA):
     DATA.index = pd.to_datetime(DATA.index).strftime('%Y-%m-%d')
@@ -106,7 +123,7 @@ def Boll(ticker, DATA, graph):
         fig = plt.figure(figsize=(6, 4))
         ax1 = fig.add_subplot(111,  ylabel='Price in $')
         ax = signals_two[['upper_BB', 'lower_BB']].plot(ax=ax1, lw=1, alpha=0.4, color="black")
-        ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha='0.4')
+        ax.fill_between(DATA.index, signals_two['upper_BB'], signals_two['lower_BB'], color='#ADCCFF', alpha=0.4)
         DATA['Close'].plot(ax=ax1, color='r', lw=2.0)
         plt.title(ticker + " Bollinger Band - 1 Year ")
 
@@ -214,8 +231,10 @@ def results(ticker):
 
 def create_report(user_email):
     
-    subject = "An email with attachment from Python"
-    body = "This is an email with attachment sent from Python"
+    createRecommendationFile();
+
+    subject = "Automated Stock Report"
+    body = "This is an automated email with your in depth stock analytics."
     sender_email = "stockanalysis553@gmail.com"
     receiver_email = user_email
     password = "stocksarecool9853!"
@@ -229,25 +248,41 @@ def create_report(user_email):
     # Add body to email
     message.attach(MIMEText(body, "plain"))
     
-    filename = "FinalAnalysis.pdf"  # In same directory as script
+    filename1 = "FinalAnalysis.pdf"  # In same directory as script\
+    filename2 = "recommendedStocks.csv"
     
     # Open PDF file in binary mode
-    filepath = os.getcwd() + '/Results/' + filename
-    with open(filepath, "rb") as attachment:
+    filepath1 = os.getcwd() + '/Results/' + filename1
+    with open(filepath1, "rb") as attachment:
         # Add file as application/octet-stream
         # Email client can usually download this automatically as attachment
         part = MIMEBase("application", "octet-stream")
         part.set_payload(attachment.read())
-    
+
     # Encode file in ASCII characters to send by email    
     encoders.encode_base64(part)
-    
+    message.attach(part)
+
     # Add header as key/value pair to attachment part
-    part.add_header("Content-Disposition",f"attachment; filename= {filename}",)
-    
+    part.add_header("Content-Disposition",f"attachment; filename= {filename1}",)
+
+    filepath2 = os.getcwd() + '/Results/' + filename2
+    with open(filepath2, "rb") as attachment:
+        # Add file as application/octet-stream
+        # Email client can usually download this automatically as attachment
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload(attachment.read())
+
+    encoders.encode_base64(part)
+    part.add_header("Content-Disposition",f"attachment; filename= {filename2}",)
+    message.attach(part)
+
+
      # Add attachment to message and convert message to string
     message.attach(part)
     text = message.as_string()
+
+
     
      # Log in to server using secure context and send email
     context = ssl.create_default_context()
@@ -260,7 +295,7 @@ def callPDFSaver():
     pathToSavePdfTo = os.getcwd() + '//' + "Results"
     pathToPictures = os.getcwd() + '//' + "Results"
     splitType = "picture"
-    numberOfEntitiesInOnePdf = 20
+    numberOfEntitiesInOnePdf = 120
     listWithImagesExtensions = ["png"]
     picturesAreInRootFolder = True
     nameOfPart = "ALL"
@@ -291,13 +326,13 @@ def mainUI():
         # #get recommendations
         # vals = {}
         # for x in file1:
-        #     # x = file1.readline()
-        #     x = x[2:-3]
-        #     try:
-        #         power = stockVal(x, 365, False)
-        #         vals[x] = power
-        #     except:
-        #         pass
+            # x = file1.readline()
+            # x = x[2:-3]
+            # try:
+                # power = stockVal(x, 365, False)
+                # vals[x] = power
+            # except:
+                # pass
         # res = dict(sorted(vals.items(), key = itemgetter(1), reverse = True)[:10]) 
         # print(res) 
 
@@ -324,6 +359,27 @@ def mainUI():
             text='Analyze!', command=runProgram).grid(row=3, column=1, sticky=tk.W, pady=4)
 
     tk.mainloop()
+
+
+def createRecommendationFile():
+    csv_columns = ['Ticker','Value']
+    dict_data = [
+        {'Ticker': 'AAPL', 'Value': 0.0},
+        {'Ticker': 'AMZN', 'Value': 0.0},
+        {'Ticker': 'GE', 'Value': 0.0},
+        {'Ticker': 'LULU', 'Value': 0.0},
+        {'Ticker': 'NVDA', 'Value': 0.0},
+    ]
+    csv_file = "recommendedStocks.csv"
+    try:
+        with open(csv_file, 'w') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+            writer.writeheader()
+            for data in dict_data:
+                writer.writerow(data)
+    except IOError:
+        print("I/O error")
+
 
 def main():
 
@@ -355,8 +411,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
 
 
 
