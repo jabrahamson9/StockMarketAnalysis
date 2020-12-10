@@ -1,4 +1,5 @@
 import os
+import sys
 
 # os.system("python -m pip install pandas_datareader")
 # os.system("python -m pip install fpdf")
@@ -209,10 +210,6 @@ def stockVal(ticker, daysBack, graph):
     return power
 
 
-# tickerlist = ['LULU', 'AAPL', 'NKE', 'GOOG', 'MSFT', 'TSLA', 'ATRA', 'SNE', 'UAL']
-tickerlist = ['FATE', 'OPTT', 'VXRT', 'IGMS']
-
-file1 = open('recommendations.txt', "r")
 
 
 
@@ -316,9 +313,30 @@ def cleanFolder():
     for f in files:
         os.remove(f)
 
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
+
 def mainUI():
     def extractTickers(t):
-        print('extracting')
+        print('extracting...')
         return t.split(',')
 
     def runProgram():
@@ -334,17 +352,22 @@ def mainUI():
             portfolioDict[ticker] = power
 
         #make long PDF
+        print('saving all images to one PDF...')
         callPDFSaver()
-         #get recommendations
+        print('Success!!')
+        #get recommendations
+        print('Beginning stock recomendations...')
         vals = {}
-        for x in file1:
-            x = file1.readline()
+        file1 = open('recommendations.txt', "r")
+        for i,x in enumerate(file1):
+            printProgressBar(i,500)
             x = x[2:-3]
             try:
                 power = stockVal(x, 365, False)
                 vals[x] = power
             except:
                 pass
+        print('Found our top 10 recomendations!')
         res = dict(sorted(vals.items(), key = itemgetter(1), reverse = True)[:10]) 
         listofDicts = []
         for key in res:
@@ -360,29 +383,35 @@ def mainUI():
         portfolioFilename = "portfolioValues.csv"
         createRecommendationFile(listofDicts, recommendedFilename)
         createRecommendationFile(portfolioDictList, portfolioFilename)
-        # print(listofDicts)
 
-        #send email 
+
+        #send email
+        print('sending email...')
         create_report(email)
+        print('email sent!')
+        sys.exit(0)
 
 
     
     master = tk.Tk()
-    tk.Label(master, 
+    master.title('Lets make this $$$$$$$')
+    master.configure(bg='#4D4E4F')
+    master.geometry("500x200")
+    tk.Label(master, bg="#4D4E4F", fg="white",
             text="Email:").grid(row=0)
-    tk.Label(master, 
+    tk.Label(master, bg="#4D4E4F", fg="white",
             text="List of Tickers: Follow the example.").grid(row=1)
 
-    e1 = tk.Entry(master)
+    e1 = tk.Entry(master, bg="#4D4E4F", fg="white")
     v = tk.StringVar(master, value='AAPL,AMZN,TSLA,GE')
-    e2 = tk.Entry(master, textvariable = v)
+    e2 = tk.Entry(master, textvariable = v, bg="#4D4E4F", fg="white")
 
     e1.grid(row=0, column=1)
     e2.grid(row=1, column=1)
 
 
-    tk.Button(master, 
-            text='Analyze!', command=runProgram).grid(row=3, column=1, sticky=tk.W, pady=4)
+    tk.Button(master, bg="#4D4E4F", fg="black",
+            text='Analyze!', command=runProgram).grid(row=3, column=1, sticky=tk.W, pady=4, )
 
     tk.mainloop()
 
