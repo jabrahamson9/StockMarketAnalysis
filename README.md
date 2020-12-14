@@ -9,10 +9,10 @@ Background: The purpose of this project is to bring many of the evaluation tools
 
 # Instructions to Run
 
-Download the repository and install Python 3 (if not already installed)
+Download the repository and install Python 3 and Anaconda (if not already installed)
 
-Navigate to the StockMarketAnalysis folder and open a terminal.
+Open a terminal and navigate to where you saved the StockMarketAnalysis folder.
 
-Execute this command: python3 dailystockposition.py
+Execute this command: python3 stockRecommender.py
 
 Enter your email when prompted, and the results will be sent to your inbox!
