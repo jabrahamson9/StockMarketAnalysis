@@ -1,11 +1,11 @@
 import os
 import sys
 
-# os.system("python -m pip install pandas_datareader")
-# os.system("python -m pip install fpdf")
-# os.system("python -m pip install opencv-python")
-# os.system("python -m pip install yfinance")
-# os.system("python -m pip install reportlab")
+os.system("python -m pip install pandas_datareader")
+os.system("python -m pip install fpdf")
+os.system("python -m pip install opencv-python")
+os.system("python -m pip install yfinance")
+os.system("python -m pip install reportlab")
 
 import pandas_datareader as pdr
 import datetime
